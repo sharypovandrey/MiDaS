@@ -6,6 +6,7 @@ import glob
 import torch
 import utils
 import cv2
+import random
 
 from torchvision.transforms import Compose
 from models.midas_net import MidasNet
@@ -21,7 +22,7 @@ def run(model_path):
     print("initialize")
 
     # select device
-    device = torch.device("cuda")
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print("device: %s" % device)
 
     # load network
@@ -51,12 +52,14 @@ def run(model_path):
     cap.set(4,240)
     print("start processing")
 
+    i = 0
     while cap.isOpened():
 
         ret, frame = cap.read()
 
         if ret:
-            img_input = transform({"image": frame})["image"]
+            img = utils.process_camera_img(frame)
+            img_input = transform({"image": img})["image"]
 
             # compute
             with torch.no_grad():
@@ -65,7 +68,7 @@ def run(model_path):
                 prediction = (
                     torch.nn.functional.interpolate(
                         prediction.unsqueeze(1),
-                        size=frame.shape[:2],
+                        size=img.shape[:2],
                         mode="bicubic",
                         align_corners=False,
                     )
@@ -76,10 +79,14 @@ def run(model_path):
 
             # output
 
-            # utils.write_depth(filename, prediction, bits=2)
+            r = random.randint(0, 10000)
+            cv2.imwrite(f"output/input-{i}-{r}.png", frame)
+            utils.write_depth(f"output/depth-{i}-{r}", prediction, bits=2)
 
             cv2.imshow('frame', frame)
-            cv2.imshow('prediction', prediction)
+            # cv2.imshow('prediction', prediction)
+
+            i += 1
 
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
