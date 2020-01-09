@@ -37,6 +37,11 @@ file in the root folder.
 
 3) The resulting inverse depth maps are written to the `output` folder.
 
+### Docker usage
+```
+xhost local:root
+docker run --rm -it -d -v ~/Github/MiDaS:/root -v /tmp/.X11-unix:/tmp/.X11-unix -e DISPLAY=unix$DISPLAY --device=/dev/video0:/dev/video0 --memory="4g" --cpus="6" --name mono torch-cv bash
+```
 
 ### Citation
 
