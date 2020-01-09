@@ -110,3 +110,5 @@ venv.bak/
 *.pt
 .cache/*
 .vscode-server-insiders/*
+.bash_history
+.gitconfig
