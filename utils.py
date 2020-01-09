@@ -114,6 +114,16 @@ def read_image(path):
     return img
 
 
+def process_camera_img(img):
+
+    if img.ndim == 2:
+        img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
+
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB) / 255.0
+
+    return img
+
+
 def resize_image(img):
     """Resize image and make it fit for network.
 
