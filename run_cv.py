@@ -7,6 +7,7 @@ import torch
 import utils
 import cv2
 import random
+import time
 
 from torchvision.transforms import Compose
 from models.midas_net import MidasNet
@@ -47,15 +48,17 @@ def run(model_path):
     model.to(device)
     model.eval()
 
-    cap = cv2.VideoCapture(0)
-    cap.set(3,640)
+    cap = cv2.VideoCapture(1)
+    print("is camera open", cap.isOpened())
+    cap.set(3,320)
     cap.set(4,240)
     print("start processing")
 
     i = 0
     while cap.isOpened():
-
+        start = time.time()
         ret, frame = cap.read()
+        print("new frame", ret)
 
         if ret:
             img = utils.process_camera_img(frame)
@@ -84,7 +87,7 @@ def run(model_path):
             utils.write_depth(f"output/depth-{i}-{r}", prediction, bits=2)
 
             cv2.imshow('frame', frame)
-            # cv2.imshow('prediction', prediction)
+            cv2.imshow('prediction', prediction)
 
             i += 1
 
@@ -92,6 +95,7 @@ def run(model_path):
                 break
         else:
             print("Camera is not recording")
+        print(f"image took {start - time.time()} s")
 
     # When everything done, release the capture
     cap.release()
