@@ -59,15 +59,21 @@ def run(model_path):
         start = time.time()
         ret, frame = cap.read()
         print("new frame", ret)
-
+        p1 = time.time() - start
+        print(f"take a picture {p1}")
         if ret:
             img = utils.process_camera_img(frame)
             img_input = transform({"image": img})["image"]
-
+            p2 = time.time() - p1
+            print(f"transoform image {p2}")
             # compute
             with torch.no_grad():
                 sample = torch.from_numpy(img_input).to(device).unsqueeze(0)
+                p3 = time.time() - p2
+                print(f"from numpy to cuda {p3}")
                 prediction = model.forward(sample)
+                p4 = time.time() - p3
+                print(f"prediction {p4}")
                 prediction = (
                     torch.nn.functional.interpolate(
                         prediction.unsqueeze(1),
@@ -79,23 +85,29 @@ def run(model_path):
                     .cpu()
                     .numpy()
                 )
+                p5 = time.time() - p4
+                print(f"prediction from cuda to cpu {p5}")
+
 
             # output
 
             r = random.randint(0, 10000)
             cv2.imwrite(f"output/input-{i}-{r}.png", frame)
             utils.write_depth(f"output/depth-{i}-{r}", prediction, bits=2)
+            p6 = time.time() - p5
+            print(f"save input and write depth {p6}")
 
             cv2.imshow('frame', frame)
             cv2.imshow('prediction', prediction)
-
+            p7 = time.time() - p6
+            print(f"show images {p7}")
             i += 1
 
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
         else:
             print("Camera is not recording")
-        print(f"image took {start - time.time()} s")
+        print(f"image took {time.time() - start} s")
 
     # When everything done, release the capture
     cap.release()
