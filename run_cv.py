@@ -108,6 +108,7 @@ def run(model_path):
         else:
             print("Camera is not recording")
         print(f"image took {time.time() - start} s")
+        print("\n-----------------------\n")
 
     # When everything done, release the capture
     cap.release()
